@@ -50,4 +50,4 @@ function intervalFunc () {
     });
 }
 
-setInterval(intervalFunc, 5 * 60 * 1000);
+setInterval(intervalFunc, 30 * 1000);
