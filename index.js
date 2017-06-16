@@ -45,6 +45,8 @@ function intervalFunc () {
         boss_next_time_a_2 = browser.text("#boss_next_time_a_2");
         boss_next_time_b_2 = browser.text("#boss_next_time_b_2");
         gtrade = browser.text("#xianlu_box");
+
+        console.log(boss_next_time_a, boss_next_time_b, boss_next_time_a_2, boss_next_time_b_2, gtrade);
     });
 }
 
