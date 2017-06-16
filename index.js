@@ -1,32 +1,26 @@
+const http = require('http');
 const Discord = require('discord.js');
-const Browser = require("zombie");
-
-Browser.localhost('0.0.0.0', '8080');
-
 const bot = new Discord.Client();
-const browser = new Browser()
 
-var default_time = "00:00"
-var boss_next_time_a = default_time;
-var boss_next_time_b = default_time;
-var boss_next_time_a_2 = default_time;
-var boss_next_time_b_2 = default_time;
+var kzarka = {};
+var kutum = {};
 
-var gtrade = "";
+var gtrade = {};
+var gtrade_string = "";
 
 bot.on('message', function(message) {
     if(message.content === '!地圖') {
         // message.reply('<http://bd.youxidudu.com/map/index_tw.html>');
-        message.channel.sendMessage('<http://bd.youxidudu.com/map/index_tw.html>');
+        message.channel.send('<http://bd.youxidudu.com/map/index_tw.html>');
     }
     if(message.content === '!克價卡') {
-        message.channel.sendMessage('```下次克價卡出生時間：' + boss_next_time_a + ' ~ ' + boss_next_time_b + '```');
+        message.channel.send('```下次克價卡出生時間：' + kzarka.next_day + '  ' + kzarka.n_horse_a + ' ~ ' + kzarka.n_horse_b + '```');
     }
     if(message.content === '!庫屯') {
-        message.channel.sendMessage('```下次庫屯出生時間：' + boss_next_time_a_2 + ' ~ ' + boss_next_time_b_2 + '```');
+        message.channel.send('```下次庫屯出生時間：' + kutum.next_day + '  ' + kutum.n_horse_a + ' ~ ' + kutum.n_horse_b + '```');
     }
     if(message.content === '!皇室') {
-        message.channel.sendMessage('```皇室納貢/釣魚更新分流：' + gtrade + '```');
+        message.channel.send('```皇室納貢/釣魚更新分流：' + gtrade_string + '```');
     }
 });
 
@@ -36,18 +30,73 @@ bot.on('ready', function(event) {
 
 bot.login('MzI0OTMwMDcxMTYyOTEyNzY4.DCRDdQ.jANi3kC1YfuQh2ZkMmauJFBmCVU');
 
-function intervalFunc () {
-    console.log('refresh boss data');
+function setBossTime() {
+    console.log('this is data');
+}
 
-    browser.visit("http://bd.youxidudu.com/", function () {
-        boss_next_time_a = browser.text("#boss_next_time_a");
-        boss_next_time_b = browser.text("#boss_next_time_b");
-        boss_next_time_a_2 = browser.text("#boss_next_time_a_2");
-        boss_next_time_b_2 = browser.text("#boss_next_time_b_2");
-        gtrade = browser.text("#xianlu_box");
+function getBossTime() {
+    // 克價卡
+    // http://bd.youxidudu.com/mylike/app_get_boss_kejiaka.php
+    var requestKzarka = http.get("http://bd.youxidudu.com/mylike/app_get_boss_kejiaka.php", function(response) {
+        var body = '';
 
-        console.log(boss_next_time_a, boss_next_time_b, boss_next_time_a_2, boss_next_time_b_2, gtrade);
+        response.on('data', function(chunk) {
+            body += chunk;
+        });
+
+        response.on('end', function() {
+            kzarka = JSON.parse(body); 
+            console.log("kzarka : " + JSON.stringify(kzarka));
+        });
+
+    }).on('error', function(e) {
+        console.log("kzarka got an error: ", e);
+    });
+    
+    // 庫屯
+    // http://bd.youxidudu.com/mylike/app_get_boss_kutun.php
+    var requestKutum = http.get("http://bd.youxidudu.com/mylike/app_get_boss_kutun.php", function(response) {
+        var body = '';
+
+        response.on('data', function(chunk) {
+            body += chunk;
+        });
+
+        response.on('end', function() {
+            kutum = JSON.parse(body); 
+            console.log("kutum : " + JSON.stringify(kutum));
+        });
+
+    }).on('error', function(e) {
+        console.log("kutum got an error: ", e);
+    });
+    
+    // 皇室納貢
+    // http://bd.youxidudu.com/mylike/app_get_gtrade_timeduan.php
+    // http://bd.youxidudu.com/mylike/app_get_gtrade.php
+    var requestGtrade = http.get("http://bd.youxidudu.com/mylike/app_get_gtrade.php", function(response) {
+        var body = '';
+
+        response.on('data', function(chunk) {
+            body += chunk;
+        });
+
+        response.on('end', function() {
+            gtrade = JSON.parse(body); 
+            gtrade_string = gtrade.now_xianlu.replace(new RegExp('</li>', 'g'), " ").replace(new RegExp('<li>', 'g'), "");
+            
+            // gtrade_string = gtrade.now_xianlu.replaceAll('</li>', ", ").replaceAll('<li>', "");
+            
+            console.log("gtrade : " + gtrade_string);
+        });
+    }).on('error', function(e) {
+        console.log("gtrade got an error: ", e);
     });
 }
 
-setInterval(intervalFunc, 30 * 1000);
+function intervalFunc () {
+    console.log('refresh boss data');
+    getBossTime();
+}
+
+setInterval(intervalFunc, 60 * 1000);
