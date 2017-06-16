@@ -1,14 +1,20 @@
 const Discord = require('discord.js');
 const Browser = require("zombie");
 
+Browser.localhost('0.0.0.0', '8080');
+
 const bot = new Discord.Client();
+const browser = new Browser()
 
-var boss_next_time_a = boss_next_time_b = boss_next_time_a_2 = boss_next_time_b_2 = '00:00';
+var default_time = "00:00"
+var boss_next_time_a = default_time;
+var boss_next_time_b = default_time;
+var boss_next_time_a_2 = default_time;
+var boss_next_time_b_2 = default_time;
+
 var gtrade = "";
-// Load the page from localhost
-browser = new Browser()
 
-bot.on('message', (message) => {
+bot.on('message', function(message) {
     if(message.content === '!地圖') {
         // message.reply('<http://bd.youxidudu.com/map/index_tw.html>');
         message.channel.sendMessage('<http://bd.youxidudu.com/map/index_tw.html>');
@@ -24,7 +30,7 @@ bot.on('message', (message) => {
     }
 });
 
-bot.on('ready', event => {
+bot.on('ready', function(event) {
     intervalFunc();
 });
 
@@ -42,4 +48,4 @@ function intervalFunc () {
     });
 }
 
-setInterval(intervalFunc, 10 * 60 * 1000);
+setInterval(intervalFunc, 5 * 60 * 1000);
